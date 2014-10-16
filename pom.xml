@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
     <groupId>dk.statsbiblioteket.soundindex</groupId>
     <artifactId>sound_index_builder</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -93,7 +93,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>eu.scape_project.audio_qa.sound_index.SoundIndexBuilderlder</mainClass>
+                            <mainClass>eu.scape_project.audio_qa.sound_index.SoundIndexBuilder</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

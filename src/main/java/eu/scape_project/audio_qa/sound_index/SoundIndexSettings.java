@@ -1,4 +1,4 @@
-package eu.scape_project.audio_qa.souind_index;
+package eu.scape_project.audio_qa.sound_index;
 
 /**
  * A class containing constants for use elsewhere in the code.
@@ -8,10 +8,6 @@ package eu.scape_project.audio_qa.souind_index;
  */
 public class SoundIndexSettings {
 
-    /**
-     * String constants.
-     */
-    public static final String MPG321 = "mpg321";
     public static final String SLASH = "/";
     public static final String UNDERSCORE = "_";
     public static final String DOTLOG = ".log";
@@ -21,9 +17,9 @@ public class SoundIndexSettings {
      * Default workflow output directories on HDFS and NFS.
      * TODO put all results on NFS
      */
-    public static String MAPPER_OUTPUT_DIR = "baj/out/";//baj SB Hadoop cluster setting
+    public static String ISMIR_DEFAULT = "/scape/shared/out/ismir/";//baj SB Hadoop cluster setting
             //"hdfs:///user/bolette/output/test-output/MigrateMp3ToWav/";//bolette-ubuntu setting
-    public static String TOOL_OUTPUT_DIR = "/scape/shared/out/wav/";//baj SB scape@iapetus setting
+    public static String FFMPEG_DEFAULT = "/scape/shared/out/wav/";//baj SB scape@iapetus setting
             //"/home/bolette/TestOutput/";//bolette-ubuntu setting
 
     /**

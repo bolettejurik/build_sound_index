@@ -1,4 +1,4 @@
-package eu.scape_project.audio_qa.souind_index;
+package eu.scape_project.audio_qa.sound_index;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * The map function of eu.scape_project.audio_qa.souind_index.SoundIndexBuilderMapper migrates the mp3 files referenced in input to wav using ffmpeg.
@@ -36,26 +37,39 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         String databaseName = new File(inputMp3path.toString()).getName().replace(".mp3",".db");
 
         //create a hadoop-job-specific output dir on hdfs
-        String outputDirPath;
+        String ffmpegOutputDir;
         if (context.getJobID() == null) {
-            outputDirPath = context.getConfiguration().get("map.outputdir", SoundIndexSettings.MAPPER_OUTPUT_DIR) +
+            ffmpegOutputDir = context.getConfiguration().get(SoundIndexBuilder.FFMPEG_OUTPUTDIR, SoundIndexSettings.FFMPEG_DEFAULT) +
                     context.getConfiguration().get("job.jobID", SoundIndexSettings.DEFAULT_JOBID);
         } else {
-            outputDirPath = context.getConfiguration().get("map.outputdir", SoundIndexSettings.MAPPER_OUTPUT_DIR) +
+            ffmpegOutputDir = context.getConfiguration().get(SoundIndexBuilder.FFMPEG_OUTPUTDIR, SoundIndexSettings.FFMPEG_DEFAULT) +
                     context.getJobID().toString();
         }
-        File indexPath = new File("/scape/shared/out/lydindex/");
 
-        FileSystem fs = FileSystem.get(context.getConfiguration());
-        boolean succesfull = fs.mkdirs(new Path(outputDirPath));
-        log.debug(outputDirPath + "\nfs.mkdirs " + succesfull);
+        String ismir_workingDir;
+        if (context.getJobID() == null) {
+            ismir_workingDir = context.getConfiguration()
+                                   .get(SoundIndexBuilder.ISMIR_OUTPUTDIR, SoundIndexSettings.ISMIR_DEFAULT)  + context.getConfiguration()
+                                                                                                        .get("job.jobID",
+                                                                                                                    SoundIndexSettings.DEFAULT_JOBID);
+        } else {
+            ismir_workingDir = context.getConfiguration()
+                                   .get(SoundIndexBuilder.ISMIR_OUTPUTDIR, SoundIndexSettings.ISMIR_DEFAULT)  + context.getJobID()
+                                                                                                        .toString();
+        }
 
-        String outputwavPath = migrate(inputMp3path, context, inputMp3, outputDirPath, fs);
+        FileSystem fs = FileSystem.get(URI.create("file:///"),context.getConfiguration());
 
-        buildIndex(outputwavPath, databaseName, outputDirPath, indexPath, fs);
+        File indexPath = new File(ismir_workingDir);
+        indexPath.mkdirs();
+
+        new File(ffmpegOutputDir).mkdirs();
+        String outputwavPath = migrate(inputMp3path, context, inputMp3, ffmpegOutputDir, fs);
+
+        buildIndex(outputwavPath, databaseName, indexPath, fs);
         rmWav(outputwavPath, fs);
 
-        context.write(new LongWritable(0), new Text(databaseName.toString()));
+        context.write(new LongWritable(0), new Text(databaseName));
     }
 
     private void rmWav(String outputwavPath, FileSystem fs) throws IOException {
@@ -65,44 +79,56 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
                 "-f",
                 outputwavPath,
         };
-        int exitCode = CLIToolRunner.runCLItool(rmCommand, null,fs,null,new Text());
 
+        final Text output = new Text();
+
+        int exitCode = CLIToolRunner.runCLItool(rmCommand, null,fs,null,output);
+        if (exitCode != 0) {
+            throw new RuntimeException(output.toString());
+        }
     }
 
-    private void buildIndex(String outputwavPath, String databaseName, String outputDirPath, File indexPath, FileSystem fs) throws IOException {
+    private void buildIndex(String outputwavPath, String databaseName, File indexPath, FileSystem fs) throws IOException {
         //build index with ismir_build_index
-        String ismirBuildIndexLog = outputDirPath + "/" + databaseName + "_ismir.log";
+        String ismirBuildIndexLog = indexPath.getAbsolutePath() + "/" + databaseName + "_ismir.log";
 
         String[] ismirBuildIndexCommand = new String[]{
-                "ismir_build_index",
+                "/home/scape/bin/ismir_build_index",
                 "-d",
                 databaseName,
                 "-i",
                 outputwavPath,
         };
-        int exitCode = CLIToolRunner.runCLItool(ismirBuildIndexCommand, ismirBuildIndexLog, fs,indexPath, new Text());
-        //TODO log exitcode
+        final Text output = new Text();
+        int exitCode = CLIToolRunner.runCLItool(ismirBuildIndexCommand, ismirBuildIndexLog, fs,indexPath, output);
+        if (exitCode != 0) {
+            throw new RuntimeException(output.toString());
+        }
+
 
     }
 
     private String migrate(Text inputMp3path, Context context, String inputMp3, String outputDirPath, FileSystem fs) throws IOException {
         //migrate with ffmpeg
         String ffmpeglog = outputDirPath + "/" + inputMp3 + "_ffmpeg.log";
-        String outputwavPath = context.getConfiguration().get("tool.outputdir", SoundIndexSettings.TOOL_OUTPUT_DIR) +
+        String outputwavPath = context.getConfiguration().get(SoundIndexBuilder.FFMPEG_OUTPUTDIR, SoundIndexSettings.FFMPEG_DEFAULT) +
                 SoundIndexSettings.SLASH + inputMp3 + SoundIndexSettings.UNDERSCORE + "ffmpeg" + SoundIndexSettings.DOTWAV;
 
         String[] ffmpegcommand = new String[]{
                 "ffmpeg",
                 "-y",
-                "-ar",
-                "5512",
                 "-i",
                 inputMp3path.toString(),
+                "-ar", "5512",
                 outputwavPath,
         };
-        int exitCode = CLIToolRunner.runCLItool(ffmpegcommand, ffmpeglog, fs, null,new Text());
-        //TODO log exitcode
-        //Note ffmpeg will not overwrite earlier results when we do not explicitly allow it!
+        final Text output = new Text();
+
+        int exitCode = CLIToolRunner.runCLItool(ffmpegcommand, ffmpeglog, fs, null,output);
+        if (exitCode != 0) {
+
+            throw new RuntimeException(output.toString());
+        }
         return outputwavPath;
     }
 
