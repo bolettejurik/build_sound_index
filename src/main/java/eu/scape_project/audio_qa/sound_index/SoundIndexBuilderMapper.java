@@ -25,7 +25,7 @@ import java.net.URI;
  */
 public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
-    private Log log = new Log4JLogger("eu.scape_project.audio_qa.souind_index.SoundIndexBuilderMapper Log");
+    private Log log = new Log4JLogger(SoundIndexBuilderMapper.class.getName());
 
     @Override
     protected void map(LongWritable lineNo, Text inputMp3path, Context context) throws IOException, InterruptedException {
@@ -64,12 +64,17 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         indexPath.mkdirs();
 
         new File(ffmpegOutputDir).mkdirs();
-        String outputwavPath = migrate(inputMp3path, context, inputMp3, ffmpegOutputDir, fs);
+        try {
+            String outputwavPath = migrate(inputMp3path, context, inputMp3, ffmpegOutputDir, fs);
 
-        buildIndex(outputwavPath, databaseName, indexPath, fs);
-        rmWav(outputwavPath, fs);
+            buildIndex(outputwavPath, databaseName, indexPath, fs);
+            rmWav(outputwavPath, fs);
+            context.write(new LongWritable(0), new Text(databaseName));
+        } catch (IOException e){
+            log.error("Caught IOException",e);
+            context.write(new LongWritable(1), inputMp3path);
+        }
 
-        context.write(new LongWritable(0), new Text(databaseName));
     }
 
     private void rmWav(String outputwavPath, FileSystem fs) throws IOException {
@@ -84,7 +89,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
 
         int exitCode = CLIToolRunner.runCLItool(rmCommand, null,fs,null,output);
         if (exitCode != 0) {
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
     }
 
@@ -102,7 +107,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         final Text output = new Text();
         int exitCode = CLIToolRunner.runCLItool(ismirBuildIndexCommand, ismirBuildIndexLog, fs,indexPath, output);
         if (exitCode != 0) {
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
 
 
@@ -126,8 +131,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
 
         int exitCode = CLIToolRunner.runCLItool(ffmpegcommand, ffmpeglog, fs, null,output);
         if (exitCode != 0) {
-
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
         return outputwavPath;
     }
