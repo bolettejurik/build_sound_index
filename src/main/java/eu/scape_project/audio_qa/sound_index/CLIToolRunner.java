@@ -1,4 +1,4 @@
-package eu.scape_project.audio_qa.souind_index;
+package eu.scape_project.audio_qa.sound_index;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 /**
  * eu.scape_project
@@ -36,12 +37,20 @@ public class CLIToolRunner {
         }
         int exitCode = proc.exitValue();
         String stdoutString = "";
-        while (stdout.ready()) {
-            stdoutString += stdout.readLine() + "\n";
+        while (true) {
+            final String s = stdout.readLine();
+            if (s == null){
+                break;
+            }
+            stdoutString += s + "\n";
         }
         String stderrString = "";
-        while (stderr.ready()) {
-            stderrString += stderr.readLine() + "\n";
+        while (true) {
+            final String s = stderr.readLine();
+            if (s == null){
+                break;
+            }
+            stderrString += s + "\n";
         }
 
         if (logFile != null) {
@@ -53,7 +62,7 @@ public class CLIToolRunner {
         }
 
         if (output == null) output = new Text();
-        output.set(stdoutString + stderrString);
+        output.set(Arrays.toString(commandline)+"\n"+stdoutString+stderrString);
         return exitCode;
     }
 }
