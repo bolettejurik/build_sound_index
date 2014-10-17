@@ -36,10 +36,7 @@ public class SoundIndexMerger extends Configured implements Tool {
 
             if (inputIndexPath.toString().equals("")) return;
 
-            if (inputIndexPath.toString().startsWith("map_")) return; //will be handled together with regular index file
-
-            //get input index name
-            String inputIndex = new File(inputIndexPath.toString()).getName().replace(".db", "");
+            if (new File(inputIndexPath.toString()).getName().startsWith("map_")) return; //will be handled together with regular index file
 
             context.write(new LongWritable(new Random(new Date().getTime()).nextInt(100)), inputIndexPath);
         }
@@ -68,6 +65,7 @@ public class SoundIndexMerger extends Configured implements Tool {
 
         job.setMapperClass(SoundIndexMergerMapper.class);
         job.setReducerClass(SoundIndexMergerReducer.class);
+
 
         job.setInputFormatClass(NLineInputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);

@@ -91,11 +91,11 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <archive>
+                    <!--<archive>
                         <manifest>
                             <mainClass>dk.statsbiblioteket.audio_qa.sound_index.SoundIndexBuilder</mainClass>
                         </manifest>
-                    </archive>
+                    </archive>-->
                 </configuration>
                 <executions>
                     <execution>

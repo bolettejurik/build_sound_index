@@ -40,6 +40,7 @@ public class SoundIndexMergerReducer extends Reducer<LongWritable, Text, LongWri
                     .toString();
         }
 
+
         FileSystem fs = FileSystem.get(URI.create("file:///"),context.getConfiguration());
 
         File indexPath = new File(ismir_workingDir);
@@ -57,8 +58,8 @@ public class SoundIndexMergerReducer extends Reducer<LongWritable, Text, LongWri
             if (indexPathIterator.hasNext()) {
                 String next = indexPathIterator.next().toString();
                 File nextFile = new File(next);
-                ismirMergeLog = ismir_workingDir + "merge_from_" + nextFile.getName().replace(".db",".log");
-                ismirMergeIndex = ismir_workingDir + "merge_from_" + nextFile.getName();
+                ismirMergeLog = ismir_workingDir + "/merge_from_" + nextFile.getName().replace(".db",".log");
+                ismirMergeIndex = ismir_workingDir + "/merge_from_" + nextFile.getName();
 
                 ismirMergeCommand.add("/home/scape/bin/ismir_merge");
                 ismirMergeCommand.add("-i");
