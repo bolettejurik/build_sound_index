@@ -1,4 +1,4 @@
-package eu.scape_project.audio_qa.sound_index;
+package dk.statsbiblioteket.audio_qa.sound_index;
 
 
 import org.apache.hadoop.conf.Configuration;
@@ -9,7 +9,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -19,7 +18,7 @@ import java.io.IOException;
 
 /**
  * Create the map-reduce job for migrating the mp3 files on the given input list using ffmpeg.
- * eu.scape_project.audio_qa.souind_index
+ * dk.statsbiblioteket.audio_qa.souind_index
  * User: baj@statsbiblioteket.dk
  * Date: 2014-01-14
  */

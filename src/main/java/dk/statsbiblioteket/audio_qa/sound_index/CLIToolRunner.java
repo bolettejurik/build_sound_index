@@ -1,4 +1,4 @@
-package eu.scape_project.audio_qa.sound_index;
+package dk.statsbiblioteket.audio_qa.sound_index;
 
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 
 /**
- * eu.scape_project
+ * dk.statsbiblioteket
  * User: baj@statsbiblioteket.dk
  * Date: 8/7/13
  * Time: 11:57 AM

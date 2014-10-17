@@ -1,9 +1,8 @@
-package eu.scape_project.audio_qa.sound_index;
+package dk.statsbiblioteket.audio_qa.sound_index;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -13,19 +12,20 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- * The map function of eu.scape_project.audio_qa.souind_index.SoundIndexBuilderMapper migrates the mp3 files referenced in input to wav using ffmpeg.
- * The map function returns the path to the resulting wav file.
+ * The map function of dk.statsbiblioteket.audio_qa.sound_index.SoundIndexBuilderMapper migrates the mp3 files
+ * referenced in input to wav using ffmpeg, builds an index for each file with ismir_build_index, deletes
+ * the wav file and returns the path to the resulting index/database.
  * <p/>
  * The input is a line number as key (not used) and a Text line, which we assume is the path to an mp3 file.
  * The output is an exit code (not used), and the path to an output file.
  * <p/>
- * eu.scape_project.audio_qa.souind_index
+ * dk.statsbiblioteket.audio_qa.sound_index
  * User: baj@statsbiblioteket.dk
- * Date: 2014-01-14
+ * Date: 2014-10-16
  */
 public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWritable, Text> {
 
-    private Log log = new Log4JLogger("eu.scape_project.audio_qa.souind_index.SoundIndexBuilderMapper Log");
+    private Log log = new Log4JLogger("dk.statsbiblioteket.audio_qa.souind_index.SoundIndexBuilderMapper Log");
 
     @Override
     protected void map(LongWritable lineNo, Text inputMp3path, Context context) throws IOException, InterruptedException {
@@ -64,6 +64,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         indexPath.mkdirs();
 
         new File(ffmpegOutputDir).mkdirs();
+
         String outputwavPath = migrate(inputMp3path, context, inputMp3, ffmpegOutputDir, fs);
 
         buildIndex(outputwavPath, databaseName, indexPath, fs);
