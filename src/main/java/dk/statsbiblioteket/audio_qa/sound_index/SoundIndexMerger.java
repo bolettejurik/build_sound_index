@@ -46,8 +46,8 @@ public class SoundIndexMerger extends Configured implements Tool {
     public int run(String[] args) throws Exception {
         Configuration configuration = getConf();
 
-        configuration.set(NLineInputFormat.LINES_PER_MAP, "10");
-        configuration.set("mapred.line.input.format.linespermap", "10");
+        configuration.set(NLineInputFormat.LINES_PER_MAP, "10000");
+        configuration.set("mapred.line.input.format.linespermap", "1000");
 
         Job job = Job.getInstance(configuration);
         job.setJarByClass(SoundIndexMerger.class);

@@ -70,7 +70,6 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         buildIndex(outputwavPath, databaseName, indexPath, fs);
         rmWav(outputwavPath, fs);
 
-        context.write(new LongWritable(0), new Text(databaseName));
     }
 
     private void rmWav(String outputwavPath, FileSystem fs) throws IOException {
@@ -85,7 +84,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
 
         int exitCode = CLIToolRunner.runCLItool(rmCommand, null,fs,null,output);
         if (exitCode != 0) {
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
     }
 
@@ -103,7 +102,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
         final Text output = new Text();
         int exitCode = CLIToolRunner.runCLItool(ismirBuildIndexCommand, ismirBuildIndexLog, fs,indexPath, output);
         if (exitCode != 0) {
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
 
 
@@ -127,8 +126,7 @@ public class SoundIndexBuilderMapper extends Mapper<LongWritable, Text, LongWrit
 
         int exitCode = CLIToolRunner.runCLItool(ffmpegcommand, ffmpeglog, fs, null,output);
         if (exitCode != 0) {
-
-            throw new RuntimeException(output.toString());
+            throw new IOException(output.toString());
         }
         return outputwavPath;
     }
